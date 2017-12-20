@@ -14,5 +14,5 @@ pem.createCertificate({ days: 1, selfSigned: true }, function (err, keys) {
     res.send('o hai!')
   })
 
-  https.createServer({ key: keys.serviceKey, cert: keys.certificate }, app).listen(443)
+  https.createServer({ key: keys.serviceKey, cert: keys.certificate }, app).listen(3000)
 })
