@@ -79,18 +79,28 @@ pem.createCertificate({ days: 1, selfSigned: true }, function (err, keys) {
 
 	});
 	app.get('/webhook', function(req, res){
-		console.log("test");
-		console.log(req.param);
-		console.log(req.param('hub.challenge'));
-		var challenge = req.param('hub.challenge');
-		var verify_token = req.param('hub.verify_token');
-		if (verify_token === '123456') {
-			res.send(challenge);
+		let VERIFY_TOKEN = "123456"
+    
+		// Parse the query params
+		let mode = req.query['hub.mode'];
+		let token = req.query['hub.verify_token'];
+		let challenge = req.query['hub.challenge'];
+
+		// Checks if a token and mode is in the query string of the request
+		if (mode && token) {
+
+		// Checks the mode and token sent is correct
+		if (mode === 'subscribe' && token === VERIFY_TOKEN) {
+		  
+			  // Responds with the challenge token from the request
+			  console.log('WEBHOOK_VERIFIED');
+			  res.status(200).send(challenge);
+
+			} else {
+			  // Responds with '403 Forbidden' if verify tokens do not match
+			  res.sendStatus(403);      
+			}
 		}
-		
-		
-		//var k = req.param('a');
-		//console.log(k);
 
 	});
 	app.post('/t', function(req, res){
