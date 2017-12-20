@@ -24,15 +24,17 @@ app.use(rawBodyParser());
 app.get('/', function(req, res){
   res.sendFile(__dirname + '/index.html');
 });
+var token = 'EAAEfHG6gfw4BALB9Ba0lhIPco2xZBCBGWKhJdf0IAZAyyozsMYJDVe6yPB6RN5Xtb2MgZB710SIai8k9kLsZAZAkoPlOzhLzoiOgxW58ekQFwagG8ZCmb0H9Lgq0ahyuZCpZCATa1RvD8fVCMZBMlLG9nujLRJM5vBdvErHwkeZBKUFAZDZD';	
+var conv = "";
 app.post('/webhook', function(req, res){
-	var token = 'EAAEfHG6gfw4BALB9Ba0lhIPco2xZBCBGWKhJdf0IAZAyyozsMYJDVe6yPB6RN5Xtb2MgZB710SIai8k9kLsZAZAkoPlOzhLzoiOgxW58ekQFwagG8ZCmb0H9Lgq0ahyuZCpZCATa1RvD8fVCMZBMlLG9nujLRJM5vBdvErHwkeZBKUFAZDZD';	
+	
 	var rawBody = req.rawBody.toString('utf8');
 	var student_obj = JSON.parse(rawBody);
 	
 	var field = student_obj.entry['0'].changes['0'].field;
 		
 	if(field == 'conversations'){
-		var conv = student_obj.entry['0'].changes['0'].value.thread_id;
+		conv = student_obj.entry['0'].changes['0'].value.thread_id;
 		//chat('hihi');
 		var id_con = student_obj.entry['0'].id;
 		var url = 'https://graph.facebook.com/v2.11/'+conv+'/messages?fields=message,from,created_time&access_token=EAAEfHG6gfw4BALB9Ba0lhIPco2xZBCBGWKhJdf0IAZAyyozsMYJDVe6yPB6RN5Xtb2MgZB710SIai8k9kLsZAZAkoPlOzhLzoiOgxW58ekQFwagG8ZCmb0H9Lgq0ahyuZCpZCATa1RvD8fVCMZBMlLG9nujLRJM5vBdvErHwkeZBKUFAZDZD';
@@ -68,12 +70,12 @@ app.post('/webhook', function(req, res){
 
 });
 app.get('/webhook', function(req, res){
-	/*console.log(req.param);
+	console.log(req.param);
 	var challenge = req.param('hub.challenge');
 	var verify_token = req.param('hub.verify_token');
 	if (verify_token === '123456') {
 		res.send(challenge);
-	}*/
+	}
 	
 	
 	//var k = req.param('a');
@@ -92,8 +94,29 @@ app.post('/t', function(req, res){
 });
 
 io.on('connection', function(socket){
-  socket.on('chat message', function(message){
+	socket.on('chat message', function(message){
+  
 	io.emit('chat message', message);
+	var headers = {
+		'User-Agent':       'Super Agent/0.0.1',
+		'Content-Type':     'application/x-www-form-urlencoded'
+	}
+
+	// Configure the request
+	var options = {
+		url: 'https://graph.facebook.com/v2.11/'+conv+'/messages?access_token='+token,
+		method: 'POST',
+		headers: headers,
+		form: {'message': message}
+	}
+
+	// Start the request
+	request(options, function (error, response, body) {
+		if (!error && response.statusCode == 200) {
+			// Print out the response body
+			console.log(body)
+		}
+	})
   });
 });
 
