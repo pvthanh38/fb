@@ -1,7 +1,8 @@
+var express = require('express');
 var app = require('express')();
 
 var http = require('http').Server(app);
-var https = require('https').Server(app);
+var https = require('https');
 var pem = require('pem')
 var io = require('socket.io')(http);
 const request = require('request-promise');
@@ -23,16 +24,17 @@ app.use(bodyParser.text({ type: 'text/html' }))*/
 var rawBodyParser = require('raw-body-parser');
 app.use(rawBodyParser());
 
-app.get('/', function(req, res){
-  res.sendFile(__dirname + '/index.html');
-});
+
 var token = 'EAAEfHG6gfw4BALB9Ba0lhIPco2xZBCBGWKhJdf0IAZAyyozsMYJDVe6yPB6RN5Xtb2MgZB710SIai8k9kLsZAZAkoPlOzhLzoiOgxW58ekQFwagG8ZCmb0H9Lgq0ahyuZCpZCATa1RvD8fVCMZBMlLG9nujLRJM5vBdvErHwkeZBKUFAZDZD';	
 var conv = "";
 pem.createCertificate({ days: 1, selfSigned: true }, function (err, keys) {
   if (err) {
     throw err
   }
-  var app = express()
+  //var app = express()
+	app.get('/', function(req, res){
+	  res.sendFile(__dirname + '/index.html');
+	});
 	app.post('/webhook', function(req, res){
 		
 		var rawBody = req.rawBody.toString('utf8');
