@@ -8,11 +8,7 @@ pem.createCertificate({ days: 1, selfSigned: true }, function (err, keys) {
   }
   var app = express()
 
-  app.get('/', function (req, res) {
-	console.log(req.param('hub.challenge'));
-	res.send(req.param('hub.challenge'))
-    res.send('o hai!')
-  })
+  
   
   app.get('/webhook', (req, res) => {
 
