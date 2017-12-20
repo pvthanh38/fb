@@ -18,7 +18,7 @@ pem.createCertificate({ days: 1, selfSigned: true }, function (err, keys) {
 
   // Your verify token. Should be a random string.
   let VERIFY_TOKEN = "123456"
-    
+    console.log(req.query);
   // Parse the query params
   let mode = req.query['hub.mode'];
   let token = req.query['hub.verify_token'];
