@@ -21,8 +21,8 @@ app.use(bodyParser.raw({ type: 'application/vnd.custom-type' }))
 // parse an HTML body into a string
 app.use(bodyParser.text({ type: 'text/html' }))*/
 
-var rawBodyParser = require('raw-body-parser');
-app.use(rawBodyParser());
+//var rawBodyParser = require('raw-body-parser');
+//app.use(rawBodyParser());
 
 
 var token = 'EAAEfHG6gfw4BALB9Ba0lhIPco2xZBCBGWKhJdf0IAZAyyozsMYJDVe6yPB6RN5Xtb2MgZB710SIai8k9kLsZAZAkoPlOzhLzoiOgxW58ekQFwagG8ZCmb0H9Lgq0ahyuZCpZCATa1RvD8fVCMZBMlLG9nujLRJM5vBdvErHwkeZBKUFAZDZD';	
@@ -79,7 +79,9 @@ pem.createCertificate({ days: 1, selfSigned: true }, function (err, keys) {
 
 	});
 	app.get('/webhook', function(req, res){
+		console.log("test");
 		console.log(req.param);
+		console.log(req.param('hub.challenge'));
 		var challenge = req.param('hub.challenge');
 		var verify_token = req.param('hub.verify_token');
 		if (verify_token === '123456') {
