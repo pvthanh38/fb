@@ -7,7 +7,7 @@ var pem = require('pem')
 var io = require('socket.io')(http);
 const request = require('request-promise');
 var api = require('request');
-
+const fs = require('fs');
 var port = process.env.PORT || 3000;
 const options = {
     cert: fs.readFileSync('/etc/letsencrypt/live/lab.letweb.net/fullchain.pem'),
