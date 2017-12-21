@@ -142,9 +142,9 @@ var conv = "";
 	});
 
 
-	/*http.listen(port, function(){
+	http.listen(port, function(){
 	  console.log('listening on *:' + port);
-	});*/
+	});
 	
 	https.createServer(options, app).listen(port);
 
