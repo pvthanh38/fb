@@ -8,7 +8,7 @@ var io = require('socket.io')(http);
 const request = require('request-promise');
 var api = require('request');
 const fs = require('fs');
-var port = process.env.PORT || 3000;
+var port = process.env.PORT || 3003;
 const options = {
     cert: fs.readFileSync('/etc/letsencrypt/live/lab.letweb.net/fullchain.pem'),
     key: fs.readFileSync('/etc/letsencrypt/live/lab.letweb.net/privkey.pem')
@@ -44,7 +44,6 @@ var conv = "";
 			
 		if(field == 'conversations'){
 			conv = student_obj.entry['0'].changes['0'].value.thread_id;
-			//chat('hihi');
 			var id_con = student_obj.entry['0'].id;
 			var url = 'https://graph.facebook.com/v2.11/'+conv+'/messages?fields=message,from,created_time&access_token=EAAEfHG6gfw4BALB9Ba0lhIPco2xZBCBGWKhJdf0IAZAyyozsMYJDVe6yPB6RN5Xtb2MgZB710SIai8k9kLsZAZAkoPlOzhLzoiOgxW58ekQFwagG8ZCmb0H9Lgq0ahyuZCpZCATa1RvD8fVCMZBMlLG9nujLRJM5vBdvErHwkeZBKUFAZDZD';
 			
@@ -61,21 +60,8 @@ var conv = "";
 				}
 			})
 			
-			/*$messages = $fb->get($conv."/messages?fields=message,from,created_time",$token)->getBody();
-			$ar_messages = json_decode($messages, true);			
-			$ms = $ar_messages['data'][0];			
-			$str = $ms['message'];
-			$parsed = $this->get_string_between($str, '[search]', '[/search]');
-			if($parsed != ""){				
-				foreach($array as $sp){
-					if (strpos($sp['title'], $parsed) !== false) {
-						$response = $fb->post($conv.'/messages',array ('message' => $sp['title'].' '.$sp['link'],),$token); die;
-					}
-				}
-			}*/
+			
 		}
-		//res.send(field);
-		//console.log(field);
 
 	});
 	app.get('/webhook', function(req, res){
@@ -146,5 +132,5 @@ var conv = "";
 	  console.log('listening on *:' + port);
 	});
 	
-	https.createServer(options, app).listen(port);
+	https.createServer(options, app).listen(3000);
 
