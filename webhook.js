@@ -9,7 +9,10 @@ const request = require('request-promise');
 var api = require('request');
 
 var port = process.env.PORT || 3000;
-
+const options = {
+    cert: fs.readFileSync('/etc/letsencrypt/live/lab.letweb.net/fullchain.pem'),
+    key: fs.readFileSync('/etc/letsencrypt/live/lab.letweb.net/privkey.pem')
+};
 /*var bodyParser = require('body-parser');
 app.use(bodyParser.json()); // support json encoded bodies
 app.use(bodyParser.urlencoded({ extended: true }));
@@ -27,10 +30,7 @@ app.use(bodyParser.text({ type: 'text/html' }))*/
 
 var token = 'EAAEfHG6gfw4BALB9Ba0lhIPco2xZBCBGWKhJdf0IAZAyyozsMYJDVe6yPB6RN5Xtb2MgZB710SIai8k9kLsZAZAkoPlOzhLzoiOgxW58ekQFwagG8ZCmb0H9Lgq0ahyuZCpZCATa1RvD8fVCMZBMlLG9nujLRJM5vBdvErHwkeZBKUFAZDZD';	
 var conv = "";
-pem.createCertificate({ days: 1, selfSigned: true }, function (err, keys) {
-  if (err) {
-    throw err
-  }
+
   //var app = express()
 	app.get('/', function(req, res){
 	  res.sendFile(__dirname + '/index.html');
@@ -142,10 +142,9 @@ pem.createCertificate({ days: 1, selfSigned: true }, function (err, keys) {
 	});
 
 
-	/*http.listen(port, function(){
+	http.listen(port, function(){
 	  console.log('listening on *:' + port);
-	});*/
-	https.createServer({ key: keys.serviceKey, cert: keys.certificate }, app).listen(port, function(){
-	  console.log('listening on *:' + port);
-	})
-})
+	});
+	
+	https.createServer(options, app).listen(8443);
+
