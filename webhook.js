@@ -24,8 +24,8 @@ app.use(bodyParser.raw({ type: 'application/vnd.custom-type' }))
 // parse an HTML body into a string
 app.use(bodyParser.text({ type: 'text/html' }))*/
 
-//var rawBodyParser = require('raw-body-parser');
-//app.use(rawBodyParser());
+var rawBodyParser = require('raw-body-parser');
+app.use(rawBodyParser());
 
 
 var token = 'EAAEfHG6gfw4BALB9Ba0lhIPco2xZBCBGWKhJdf0IAZAyyozsMYJDVe6yPB6RN5Xtb2MgZB710SIai8k9kLsZAZAkoPlOzhLzoiOgxW58ekQFwagG8ZCmb0H9Lgq0ahyuZCpZCATa1RvD8fVCMZBMlLG9nujLRJM5vBdvErHwkeZBKUFAZDZD';	
