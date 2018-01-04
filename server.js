@@ -100,12 +100,15 @@ var conv = "";
 	});
 	
 	app.get('/',
-		require('connect-ensure-login').ensureLoggedIn(),
+		passport.authenticate('facebook', { 
+			scope : ['manage_pages', 'pages_show_list']
+		}),
+		//require('connect-ensure-login').ensureLoggedIn(),
 		function(req, res){
 			
 			res.sendFile(__dirname + '/index.html');
 			var token = req.user.token;
-			//console.log("=======");			
+			console.log("=======");			
 			var url = 'https://graph.facebook.com/v2.11/me/accounts?access_token='+token;
 			console.log(url);
 			api(url, function (error, response, body) {
@@ -118,7 +121,8 @@ var conv = "";
 					//console.log("=======");
 				}
 				
-			})
+			})	
+			
 	});
 	
 	/*app.get('/', function(req, res){
@@ -269,6 +273,10 @@ var conv = "";
 					io.emit('attachments', raw_obj);					
 				}				
 			})			
+		});
+		
+		socket.on('get page', function(message){
+					
 		});
 	});
 

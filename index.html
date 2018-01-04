@@ -47,6 +47,7 @@
 	$(function () {
         var socket = io();
 		var conv_id = "";
+		socket.emit('get page', 'test');
         $('form').submit(function(){
 			socket.emit('chat message', $('#m').val());
 			

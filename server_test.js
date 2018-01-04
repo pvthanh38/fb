@@ -83,20 +83,21 @@ var conv = "";
 			res.render('profile', { user: req.user });
 	});
 	
-	app.get('/',
+	/*app.get('/',
 		require('connect-ensure-login').ensureLoggedIn(),
 		function(req, res){
 			
 			res.sendFile(__dirname + '/server_test.html');
 			io.emit('test', "hehe");
-	});
-	
-	/*app.get('/', function(req, res){
-		console.log("=======");
-		console.log(req.user);
-		console.log("=======");		
-		res.sendFile(__dirname + '/index.html');
 	});*/
+	
+	app.get('/', function(req, res){
+		
+		
+		io.emit('test', "hehe");
+		res.sendFile(__dirname + '/server_test.html');
+		io.emit('test', "kaka");
+	});
 	
 	app.post('/webhook', function(req, res){		
 		var rawBody = req.rawBody.toString('utf8');
