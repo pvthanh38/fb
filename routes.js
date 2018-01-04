@@ -1,54 +1,9 @@
-var express = require('express');
-
 var passport = require('passport');
 var Strategy = require('passport-facebook').Strategy;
-var fb_login = require("./server.js");
 
 var app = require('express')();
 
-var http = require('http').Server(app);
-var https = require('https');
-var pem = require('pem')
-var io = require('socket.io')(http);
-const request = require('request-promise');
-var api = require('request');
-const fs = require('fs');
-var port = process.env.PORT || 3003;
-/*const options = {
-    cert: fs.readFileSync('/etc/letsencrypt/live/lab.letweb.net/fullchain.pem'),
-    key: fs.readFileSync('/etc/letsencrypt/live/lab.letweb.net/privkey.pem')
-};*/
-/*var bodyParser = require('body-parser');
-app.use(bodyParser.json()); // support json encoded bodies
-app.use(bodyParser.urlencoded({ extended: true }));
-app.use(bodyParser.json({ type: 'application/*+json' }))
 
-// parse some custom thing into a Buffer
-app.use(bodyParser.raw({ type: 'application/vnd.custom-type' }))
-
-// parse an HTML body into a string
-app.use(bodyParser.text({ type: 'text/html' }))*/
-
-var rawBodyParser = require('raw-body-parser');
-app.use(rawBodyParser());
-
-
-//Facebook
-// Configure view engine to render EJS templates.
-app.set('views', __dirname + '/views');
-app.set('view engine', 'ejs');
-
-// Use application-level middleware for common functionality, including
-// logging, parsing, and session handling.
-app.use(require('morgan')('combined'));
-app.use(require('cookie-parser')());
-app.use(require('body-parser').urlencoded({ extended: true }));
-app.use(require('express-session')({ secret: 'keyboard cat', resave: true, saveUninitialized: true }));
-
-// Initialize Passport and restore authentication state, if any, from the
-// session.
-app.use(passport.initialize());
-app.use(passport.session());
 
 
 var token = 'EAAEfHG6gfw4BALB9Ba0lhIPco2xZBCBGWKhJdf0IAZAyyozsMYJDVe6yPB6RN5Xtb2MgZB710SIai8k9kLsZAZAkoPlOzhLzoiOgxW58ekQFwagG8ZCmb0H9Lgq0ahyuZCpZCATa1RvD8fVCMZBMlLG9nujLRJM5vBdvErHwkeZBKUFAZDZD';	
@@ -209,9 +164,4 @@ var conv = "";
 	});
 
 
-	http.listen(port, function(){
-	  console.log('listening on *:' + port);
-	});
-	
-	//https.createServer(options, app).listen(3000);
 
