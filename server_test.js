@@ -16,8 +16,7 @@ const fs = require('fs');
 var port = process.env.PORT || 3003;
 
 
-var rawBodyParser = require('raw-body-parser');
-app.use(rawBodyParser());
+
 
 
 app.set('views', __dirname + '/views');
