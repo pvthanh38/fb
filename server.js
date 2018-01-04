@@ -73,7 +73,7 @@ var conv = "";
 		passport.authenticate('facebook'));
 
 	app.get('/login/facebook/return', 
-		passport.authenticate('facebook', { failureRedirect: '/login' }),
+		passport.authenticate('facebook', { failureRedirect: '/login', scope : ['manage_pages', 'pages_show_list'] }),
 		function(req, res) {			
 			res.redirect('/');
 		});
@@ -100,10 +100,11 @@ var conv = "";
 	});
 	
 	app.get('/',
-		passport.authenticate('facebook', { 
+		/*passport.authenticate('facebook', {
+			failureRedirect: '/login',
 			scope : ['manage_pages', 'pages_show_list']
-		}),
-		//require('connect-ensure-login').ensureLoggedIn(),
+		}),*/
+		require('connect-ensure-login').ensureLoggedIn(),
 		function(req, res){
 			
 			res.sendFile(__dirname + '/index.html');
