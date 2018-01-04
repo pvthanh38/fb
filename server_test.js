@@ -8,7 +8,7 @@ var app = require('express')();
 
 var http = require('http').Server(app);
 var https = require('https');
-var pem = require('pem')
+//var pem = require('pem')
 var io = require('socket.io')(http);
 const request = require('request-promise');
 var api = require('request');
