@@ -47,8 +47,8 @@
 	$(function () {
         var socket = io();
 		var conv_id = "";
-		//var token = "<?php echo $_GET['token']; ?>";
-		//socket.emit('get page', token);
+		var token = "<%= user.token %>";
+		socket.emit('get page', token);
         $('form').submit(function(){
 			socket.emit('chat message', $('#m').val());
 			

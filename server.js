@@ -106,9 +106,11 @@ var conv = "";
 		}),*/
 		require('connect-ensure-login').ensureLoggedIn(),
 		function(req, res){
-			
-			res.sendFile(__dirname + '/index.html');
 			var token = req.user.token;
+			res.render('index', { user: req.user });
+			//res.sendFile(__dirname + '/index.html');
+			//res.redirect('/',{ user: req.user });
+			/*
 			console.log("=======");			
 			var url = 'https://graph.facebook.com/v2.11/me/accounts?access_token='+token;
 			console.log(url);
@@ -122,7 +124,7 @@ var conv = "";
 					//console.log("=======");
 				}
 				
-			})	
+			})	*/
 			
 	});
 	
@@ -230,6 +232,7 @@ var conv = "";
 			request(options, function (error, response, body) {
 				if (!error && response.statusCode == 200) {
 					// Print out the response body
+					console.log("=======1111111111");
 					console.log(body)
 				}
 			})
@@ -277,7 +280,21 @@ var conv = "";
 		});
 		
 		socket.on('get page', function(message){
-					
+			var token = message;
+			console.log("=======");			
+			var url = 'https://graph.facebook.com/v2.11/me/accounts?access_token='+token;
+			console.log(url);
+			api(url, function (error, response, body) {
+				if (!error && response.statusCode == 200) {
+					var raw_obj = JSON.parse(body);
+					//console.log(raw_obj);
+					io.emit('facebook_page', raw_obj);
+					//req.user.pages = raw_obj;
+					//cb(null, req.user);
+					//console.log("=======");
+				}
+				
+			})		
 		});
 	});
 
