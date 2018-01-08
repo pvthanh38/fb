@@ -117,10 +117,21 @@
 					var token = $('#conver-fb').attr('token');
 					var ar = [id,name,token];
 					
-					socket.emit('attachments', ar);
+					//socket.emit('attachments', ar);
+					
+					if(value.attachments){
+						if(value.attachments.data[0].mime_type == "image/jpeg"){					
+							var str = "<a href='"+value.attachments.data[0].image_data.url+"'><img src='"+value.attachments.data[0].image_data.url+"' style='width:50px' /></a>";					
+							$('#messages').append($('<li>').html( value.from.name+": "+str));
+						}else{
+							var str = "<a href='"+value.attachments.data[0].file_url+"'>"+value.attachments.data[0].name+"</a>";
+							$('#messages').append($('<li>').html(value.from.name +": "+str));
+						}
+						
+					}
 					
 				}else{
-					$('.conver-first').after($('<li class="conver-li" >').html(value.from.name +": "+value.message));
+					$('#messages').append($('<li>').html(value.from.name +": "+value.message));
 					window.scrollTo(0, $("#messages").height());
 				}				
 			});
@@ -132,10 +143,10 @@
 			if(msg.attachments){
 				if(msg.attachments.data[0].mime_type == "image/jpeg"){					
 					var str = "<a href='"+msg.attachments.data[0].image_data.url+"'><img src='"+msg.attachments.data[0].image_data.url+"' style='width:50px' /></a>";					
-					$('.conver-first').after($('<li class="" >').html( "tet"+": "+str));
+					$('#messages').append($('<li>').html( "tet"+": "+str));
 				}else{
 					var str = "<a href='"+msg.attachments.data[0].file_url+"'>"+msg.attachments.data[0].name+"</a>";
-					$('.conver-first').after($('<li class="" >').html("test" +": "+str));
+					$('#messages').append($('<li>').html("test" +": "+str));
 				}
 				
 			}

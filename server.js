@@ -14,10 +14,10 @@ const request = require('request-promise');
 var api = require('request');
 const fs = require('fs');
 var port = process.env.PORT || 3003;
-const options = {
+/*const options = {
     cert: fs.readFileSync('/etc/letsencrypt/live/lab.letweb.net/fullchain.pem'),
     key: fs.readFileSync('/etc/letsencrypt/live/lab.letweb.net/privkey.pem')
-};
+};*/
 /*var bodyParser = require('body-parser');
 app.use(bodyParser.json()); // support json encoded bodies
 app.use(bodyParser.urlencoded({ extended: true }));
@@ -142,7 +142,7 @@ var conv = "";
 		if(field == 'conversations'){
 			conv = student_obj.entry['0'].changes['0'].value.thread_id;
 			var id_con = student_obj.entry['0'].id;
-			var url = 'https://graph.facebook.com/v2.11/'+conv+'/messages?fields=message,from,created_time&access_token='+token;		
+			var url = 'https://graph.facebook.com/v2.11/'+conv+'/messages?fields=message,from,created_time,attachments&access_token='+token;		
 			api(url, function (error, response, body) {
 				if (!error && response.statusCode == 200) {
 					var info = JSON.parse(body);
@@ -252,7 +252,7 @@ var conv = "";
 		socket.on('messages', function(message){
 			var conv = message[0];
 			var token = message[1];
-			var url = 'https://graph.facebook.com/v2.11/'+conv+'/messages?fields=message,from,created_time&access_token='+token;
+			var url = 'https://graph.facebook.com/v2.11/'+conv+'/messages?fields=message,from,created_time,attachments&access_token='+token;
 			
 			api(url, function (error, response, body) {
 				if (!error && response.statusCode == 200) {
@@ -303,5 +303,5 @@ var conv = "";
 	  console.log('listening on *:' + port);
 	});
 	
-	https.createServer(options, app).listen(3000);
+	//https.createServer(options, app).listen(3000);
 
