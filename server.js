@@ -14,10 +14,10 @@ const request = require('request-promise');
 var api = require('request');
 const fs = require('fs');
 var port = process.env.PORT || 3003;
-/*const options = {
+const options = {
     cert: fs.readFileSync('/etc/letsencrypt/live/lab.letweb.net/fullchain.pem'),
     key: fs.readFileSync('/etc/letsencrypt/live/lab.letweb.net/privkey.pem')
-};*/
+};
 /*var bodyParser = require('body-parser');
 app.use(bodyParser.json()); // support json encoded bodies
 app.use(bodyParser.urlencoded({ extended: true }));
@@ -303,5 +303,5 @@ var conv = "";
 	  console.log('listening on *:' + port);
 	});
 	
-	//https.createServer(options, app).listen(3000);
+	https.createServer(options, app).listen(3000);
 
