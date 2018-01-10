@@ -107,7 +107,8 @@ var rooms = [];
 		res.sendFile(__dirname + '/index.html');
 	});*/
 	
-	app.post('/webhook', function(req, res){		
+	app.post('/webhook', function(req, res){
+		var token = req.user.token;		
 		var rawBody = req.rawBody.toString('utf8');
 		var student_obj = JSON.parse(rawBody);		
 		var field = student_obj.entry['0'].changes['0'].field;			
