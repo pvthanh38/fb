@@ -108,53 +108,11 @@ var rooms = [];
 	});*/
 	
 	app.post('/webhook', function(req, res){
-		var token = req.user.token;
-		console.log("=======22222222222222");
-		console.log(token);
-			
+		
+		
 		var rawBody = req.rawBody.toString('utf8');
-		var student_obj = JSON.parse(rawBody);		
-		var field = student_obj.entry['0'].changes['0'].field;			
-		if(field == 'conversations'){
-			conv = student_obj.entry['0'].changes['0'].value.thread_id;
-			var id_con = student_obj.entry['0'].id;
-			var url = 'https://graph.facebook.com/v2.11/'+conv+'/messages?fields=message,from,created_time,attachments&access_token='+token;		
-			api(url, function (error, response, body) {
-				if (!error && response.statusCode == 200) {
-					var info = JSON.parse(body);
-					var ms = info.data[0];
-					var str = ms.message;
-					var id = ms.id;
-					var name = ms.from.name;
-					var ar = [];
-					if(str === ""){
-						var url_att = 'https://graph.facebook.com/v2.11/'+id+'/attachments?access_token='+token;
-						api(url_att, function (err_att, res_att, body_att) {							
-							if (!err_att && res_att.statusCode == 200) {
-								//res.setHeader('test', '1');
-								var body_arr = JSON.parse(body_att);					
-								if(body_arr.data.length > 0){
-									if(body_arr.data[0].mime_type == "image/jpeg"){	
-										str = "<a href='"+body_arr.data[0].image_data.url+"'><img src='"+body_arr.data[0].image_data.url+"' style='width:50px' /></a>";
-										ar = [conv, name, str];
-										io.emit('chat message', ar);
-									}else{
-										str = "<a href='"+body_arr.data[0].file_url+"'>"+body_arr.data[0].name+"</a>";
-										ar = [conv, name, str];
-										io.emit('chat message', ar);
-									}									
-								}
-								return body_arr;								
-							}							
-						})
-					}else{
-						ar = [conv, name, str];
-						io.emit('chat message', ar);
-					}				
-					return true;
-				}
-			})	
-		}
+		io.emit('webhook', rawBody);
+		
 	});
 	
 	app.get('/webhook', function(req, res){
@@ -268,6 +226,54 @@ var rooms = [];
 				}
 				
 			})		
+		});
+		
+		socket.on('get page', function(message){
+			var token = message[0];
+			//var token = req.user.token;
+		
+			var student_obj = JSON.parse(message[1]);		
+			var field = student_obj.entry['0'].changes['0'].field;			
+			if(field == 'conversations'){
+				conv = student_obj.entry['0'].changes['0'].value.thread_id;
+				var id_con = student_obj.entry['0'].id;
+				var url = 'https://graph.facebook.com/v2.11/'+conv+'/messages?fields=message,from,created_time,attachments&access_token='+token;		
+				api(url, function (error, response, body) {
+					if (!error && response.statusCode == 200) {
+						var info = JSON.parse(body);
+						var ms = info.data[0];
+						var str = ms.message;
+						var id = ms.id;
+						var name = ms.from.name;
+						var ar = [];
+						if(str === ""){
+							var url_att = 'https://graph.facebook.com/v2.11/'+id+'/attachments?access_token='+token;
+							api(url_att, function (err_att, res_att, body_att) {							
+								if (!err_att && res_att.statusCode == 200) {
+									//res.setHeader('test', '1');
+									var body_arr = JSON.parse(body_att);					
+									if(body_arr.data.length > 0){
+										if(body_arr.data[0].mime_type == "image/jpeg"){	
+											str = "<a href='"+body_arr.data[0].image_data.url+"'><img src='"+body_arr.data[0].image_data.url+"' style='width:50px' /></a>";
+											ar = [conv, name, str];
+											io.emit('chat message', ar);
+										}else{
+											str = "<a href='"+body_arr.data[0].file_url+"'>"+body_arr.data[0].name+"</a>";
+											ar = [conv, name, str];
+											io.emit('chat message', ar);
+										}									
+									}
+									return body_arr;								
+								}							
+							})
+						}else{
+							ar = [conv, name, str];
+							io.emit('chat message', ar);
+						}				
+						return true;
+					}
+				})	
+			}	
 		});
 	});
 

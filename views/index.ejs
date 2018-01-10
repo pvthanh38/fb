@@ -68,6 +68,12 @@
 			window.scrollTo(0, $("#messages").height());
         });
 		
+		socket.on('webhook', function(msg){
+			var ar = [room, msg];
+			socket.emit('conversations', ar);
+			
+        });
+		
 		socket.on('facebook_page', function(msg){
 			var obj = jQuery.parseJSON( '{ "name": "John" }' );
 			//console.log(msg.data);
