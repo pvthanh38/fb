@@ -111,7 +111,8 @@ var rooms = [];
 		
 		
 		var rawBody = req.rawBody.toString('utf8');
-		io.emit('webhook', rawBody);
+		var student_obj = JSON.parse(message[1]);
+		io.emit('webhook', student_obj);
 		
 	});
 	
@@ -232,7 +233,7 @@ var rooms = [];
 			var token = message[0];
 			//var token = req.user.token;
 		
-			var student_obj = JSON.parse(message[1]);		
+			var student_obj = message[1];		
 			var field = student_obj.entry['0'].changes['0'].field;			
 			if(field == 'conversations'){
 				conv = student_obj.entry['0'].changes['0'].value.thread_id;
