@@ -13,8 +13,8 @@ var Strategy = require('passport-facebook').Strategy;
 passport.use(new Strategy({
     clientID: '315681952268046',
     clientSecret: '6f5c5207bb4623ca26144841729797ba',
-    callbackURL: 'http://localhost:3003/login/facebook/return'
-	//callbackURL: 'http://lab.letweb.net:3003/login/facebook/return'
+    //callbackURL: 'http://localhost:3003/login/facebook/return'
+	callbackURL: 'http://lab.letweb.net:3003/login/facebook/return'
   },
   function(accessToken, refreshToken, profile, cb) {
     // In this example, the user's Facebook profile is supplied as the user

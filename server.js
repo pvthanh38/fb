@@ -136,8 +136,7 @@ var rooms = [];
 			  res.sendStatus(403);      
 			}
 		}
-	});	
-	
+	});
 
 	io.on('connection', function(socket){
 		socket.on('chat message', function(message){
