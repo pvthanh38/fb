@@ -232,7 +232,8 @@ var rooms = [];
 		socket.on('get page', function(message){
 			var token = message[0];
 			//var token = req.user.token;
-		
+			console.log("=======44444444444444");
+			console.log(message[1]);
 			var student_obj = message[1];		
 			var field = student_obj.entry['0'].changes['0'].field;			
 			if(field == 'conversations'){
