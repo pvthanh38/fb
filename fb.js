@@ -14,7 +14,7 @@ passport.use(new Strategy({
     clientID: '315681952268046',
     clientSecret: '6f5c5207bb4623ca26144841729797ba',
     //callbackURL: 'http://localhost:3003/login/facebook/return'
-	callbackURL: 'http://lab.letweb.net:3003/login/facebook/return'
+	callbackURL: 'http://lab.letweb.net/login/facebook/return'
   },
   function(accessToken, refreshToken, profile, cb) {
     // In this example, the user's Facebook profile is supplied as the user
@@ -24,8 +24,6 @@ passport.use(new Strategy({
     // providers.
 	
 	profile.token = accessToken;
-	console.log("0000000000000000000000000000000000");
-	console.log(profile);
     return cb(null, profile); // cb(null, profile);
   }));
 
