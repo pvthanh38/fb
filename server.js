@@ -108,7 +108,10 @@ var rooms = [];
 	});*/
 	
 	app.post('/webhook', function(req, res){
-		var token = req.user.token;		
+		var token = req.user.token;
+		console.log("=======22222222222222");
+		console.log(token);
+			
 		var rawBody = req.rawBody.toString('utf8');
 		var student_obj = JSON.parse(rawBody);		
 		var field = student_obj.entry['0'].changes['0'].field;			
