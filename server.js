@@ -111,7 +111,7 @@ var rooms = [];
 		
 		
 		var rawBody = req.rawBody.toString('utf8');
-		var student_obj = JSON.parse(message[1]);
+		var student_obj = JSON.parse(rawBody);
 		io.emit('webhook', student_obj);
 		
 	});
