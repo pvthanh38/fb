@@ -26,7 +26,7 @@
   </head>
   <body>
 	<div class="col-left">
-		<ul id="page-fb">
+		<ul id="page-fb" class="<%= user.token %>">
 			
 		</ul>		
 	</div>
@@ -48,11 +48,10 @@
         var socket = io();
 		var conv_id = "";
 		var token = "<%= user.token %>";
+		var room = "<%= user.token %>";
 		socket.emit('get page', token);
         $('form').submit(function(){
 			socket.emit('chat message', $('#m').val());
-			
-			
 			var token = $('#conver-fb').attr('token');
 			var ar = [conv_id,token, $('#m').val()];
 			
@@ -66,7 +65,6 @@
 			if(conv_id == msg[0]){
 				$('#messages').append($('<li>').html(msg[1]+": "+msg[2]));
 			}
-			
 			window.scrollTo(0, $("#messages").height());
         });
 		
@@ -74,8 +72,14 @@
 			var obj = jQuery.parseJSON( '{ "name": "John" }' );
 			//console.log(msg.data);
 			$('#page-fb').html("");
+			var curren_token = $('#token').val();
+			console.log(curren_token);
+			console.log("==========");
+			console.log(token);
 			$.each( msg.data, function( key, value ) {
-				$('#page-fb').append($('<li class="page-li" token="'+value.access_token+'" page_id="'+value.id+'">').html(value.name));
+				//if(curren_token == token){
+					$('.'+token).append($('<li class="page-li" token="'+value.access_token+'" page_id="'+value.id+'">').html(value.name));
+				//}
 			});
 			
         });
@@ -83,7 +87,7 @@
 		$(document).on('click', '.page-li', function(e) { 
 			var id = $(this).attr('page_id');
 			var token = $(this).attr('token');
-			var ar = [id,token];
+			var ar = [id, token, room];
 			$('#conver-fb').attr('token', token);
 			
 			socket.emit('conversations', ar);
@@ -99,7 +103,7 @@
 		$(document).on('click', '.conver-li', function(e) { 
 			var id = $(this).attr('conver_id');
 			var token = $('#conver-fb').attr('token');
-			var ar = [id,token];
+			var ar = [id, token, room];
 			conv_id = id;
 			//console.log(ar);
 			socket.emit('messages', ar);
@@ -151,10 +155,9 @@
 				
 			}
 			window.scrollTo(0, $("#messages").height());
-			
-				
-			
         });
+		
+		
 	});
     </script>
   </body>

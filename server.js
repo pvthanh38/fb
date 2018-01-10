@@ -50,17 +50,12 @@ app.use(require('express-session')({ secret: 'keyboard cat', resave: true, saveU
 app.use(passport.initialize());
 app.use(passport.session());
 
-
-var token = 'EAAEfHG6gfw4BALB9Ba0lhIPco2xZBCBGWKhJdf0IAZAyyozsMYJDVe6yPB6RN5Xtb2MgZB710SIai8k9kLsZAZAkoPlOzhLzoiOgxW58ekQFwagG8ZCmb0H9Lgq0ahyuZCpZCATa1RvD8fVCMZBMlLG9nujLRJM5vBdvErHwkeZBKUFAZDZD';	
+//var token = 'EAAEfHG6gfw4BALB9Ba0lhIPco2xZBCBGWKhJdf0IAZAyyozsMYJDVe6yPB6RN5Xtb2MgZB710SIai8k9kLsZAZAkoPlOzhLzoiOgxW58ekQFwagG8ZCmb0H9Lgq0ahyuZCpZCATa1RvD8fVCMZBMlLG9nujLRJM5vBdvErHwkeZBKUFAZDZD';	
 var conv = "";
+var rooms = [];
 
-  //var app = express()
-  // Define routes.
 	app.get('/home',
 		function(req, res) {
-			/*console.log("=======");
-			console.log(profile);
-			console.log("=======");*/
 			res.render('home', { user: req.user });
 		});
 
@@ -90,42 +85,19 @@ var conv = "";
 					var raw_obj = JSON.parse(body);
 					//console.log(raw_obj);
 					io.emit('facebook_page', raw_obj);
-					req.user.pages = raw_obj;
-					//cb(null, req.user);
-					//console.log("=======");
+					req.user.pages = raw_obj;					
 				}
 				
 			})
 			res.render('profile', { user: req.user });
 	});
 	
-	app.get('/',
-		/*passport.authenticate('facebook', {
-			failureRedirect: '/login',
-			scope : ['manage_pages', 'pages_show_list']
-		}),*/
+	app.get('/',		
 		require('connect-ensure-login').ensureLoggedIn(),
 		function(req, res){
 			var token = req.user.token;
-			res.render('index', { user: req.user });
-			//res.sendFile(__dirname + '/index.html');
-			//res.redirect('/',{ user: req.user });
-			/*
-			console.log("=======");			
-			var url = 'https://graph.facebook.com/v2.11/me/accounts?access_token='+token;
-			console.log(url);
-			api(url, function (error, response, body) {
-				if (!error && response.statusCode == 200) {
-					var raw_obj = JSON.parse(body);
-					//console.log(raw_obj);
-					io.emit('facebook_page', raw_obj);
-					req.user.pages = raw_obj;
-					//cb(null, req.user);
-					//console.log("=======");
-				}
-				
-			})	*/
-			
+			rooms.push(token);			
+			res.render('index', { user: req.user });			
 	});
 	
 	/*app.get('/', function(req, res){
@@ -152,18 +124,13 @@ var conv = "";
 					var name = ms.from.name;
 					var ar = [];
 					if(str === ""){
-						//res.end("kaka");
-						//console.log("kaka");
 						var url_att = 'https://graph.facebook.com/v2.11/'+id+'/attachments?access_token='+token;
-						api(url_att, function (err_att, res_att, body_att) {
-							
+						api(url_att, function (err_att, res_att, body_att) {							
 							if (!err_att && res_att.statusCode == 200) {
 								//res.setHeader('test', '1');
-								var body_arr = JSON.parse(body_att);						
-
+								var body_arr = JSON.parse(body_att);					
 								if(body_arr.data.length > 0){
-									if(body_arr.data[0].mime_type == "image/jpeg"){
-										
+									if(body_arr.data[0].mime_type == "image/jpeg"){	
 										str = "<a href='"+body_arr.data[0].image_data.url+"'><img src='"+body_arr.data[0].image_data.url+"' style='width:50px' /></a>";
 										ar = [conv, name, str];
 										io.emit('chat message', ar);
@@ -171,8 +138,7 @@ var conv = "";
 										str = "<a href='"+body_arr.data[0].file_url+"'>"+body_arr.data[0].name+"</a>";
 										ar = [conv, name, str];
 										io.emit('chat message', ar);
-									}
-									
+									}									
 								}
 								return body_arr;								
 							}							
@@ -182,8 +148,6 @@ var conv = "";
 						io.emit('chat message', ar);
 					}				
 					return true;
-					//res.send(info);
-					//console.log(info);
 				}
 			})	
 		}
@@ -197,9 +161,8 @@ var conv = "";
 		let challenge = req.query['hub.challenge'];
 		// Checks if a token and mode is in the query string of the request
 		if (mode && token) {
-
-		// Checks the mode and token sent is correct
-		if (mode === 'subscribe' && token === VERIFY_TOKEN) {		  
+			// Checks the mode and token sent is correct
+			if (mode === 'subscribe' && token === VERIFY_TOKEN) {		  
 			  // Responds with the challenge token from the request
 			  console.log('WEBHOOK_VERIFIED');
 			  res.status(200).send(challenge);
@@ -239,12 +202,14 @@ var conv = "";
 		});
 		socket.on('conversations', function(message){
 			var token = message[1];
+			var room = message[2];
 			var url = 'https://graph.facebook.com/v2.11/'+message[0]+'/conversations?fields=senders&access_token='+token;
 			
 			api(url, function (error, response, body) {
 				if (!error && response.statusCode == 200) {
 					var raw_obj = JSON.parse(body);
-					io.emit('conversations', raw_obj);					
+					//io.emit('conversations', raw_obj);
+					io.sockets.in(room).emit('conversations', raw_obj);
 				}				
 			})			
 		});
@@ -252,12 +217,14 @@ var conv = "";
 		socket.on('messages', function(message){
 			var conv = message[0];
 			var token = message[1];
+			var room = message[2];
 			var url = 'https://graph.facebook.com/v2.11/'+conv+'/messages?fields=message,from,created_time,attachments&access_token='+token;
 			
 			api(url, function (error, response, body) {
 				if (!error && response.statusCode == 200) {
 					var raw_obj = JSON.parse(body);
-					io.emit('messages', raw_obj);					
+					//io.emit('messages', raw_obj);
+					io.sockets.in(room).emit('messages', raw_obj);
 				}				
 			})			
 		});
@@ -281,6 +248,7 @@ var conv = "";
 		
 		socket.on('get page', function(message){
 			var token = message;
+			socket.join(token);
 			console.log("=======");			
 			var url = 'https://graph.facebook.com/v2.11/me/accounts?access_token='+token;
 			console.log(url);
@@ -288,7 +256,8 @@ var conv = "";
 				if (!error && response.statusCode == 200) {
 					var raw_obj = JSON.parse(body);
 					//console.log(raw_obj);
-					io.emit('facebook_page', raw_obj);
+					io.sockets.in(token).emit('facebook_page', raw_obj);
+					//io.emit('facebook_page', raw_obj);
 					//req.user.pages = raw_obj;
 					//cb(null, req.user);
 					//console.log("=======");
