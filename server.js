@@ -14,10 +14,10 @@ const request = require('request-promise');
 var api = require('request');
 const fs = require('fs');
 var port = process.env.PORT || 3003;
-const options = {
+/*const options = {
     cert: fs.readFileSync('/etc/letsencrypt/live/lab.letweb.net/fullchain.pem'),
     key: fs.readFileSync('/etc/letsencrypt/live/lab.letweb.net/privkey.pem')
-};
+};*/
 /*var bodyParser = require('body-parser');
 app.use(bodyParser.json()); // support json encoded bodies
 app.use(bodyParser.urlencoded({ extended: true }));
@@ -108,13 +108,15 @@ var rooms = [];
 	});*/
 	
 	app.post('/webhook', function(req, res){
-		
-		
 		var rawBody = req.rawBody.toString('utf8');
 		var student_obj = JSON.parse(rawBody);
 		io.emit('webhook', student_obj);
 		
 	});
+	
+	setInterval(() => {		
+		io.emit('load message', "new message");
+	}, 3000)
 	
 	app.get('/webhook', function(req, res){
 		let VERIFY_TOKEN = "123456"    
@@ -157,17 +159,13 @@ var rooms = [];
 			// Start the request
 			request(options, function (error, response, body) {
 				if (!error && response.statusCode == 200) {
-					// Print out the response body
-					console.log("=======1111111111");
-					console.log(body)
 				}
 			})
 		});
 		socket.on('conversations', function(message){
 			var token = message[1];
 			var room = message[2];
-			var url = 'https://graph.facebook.com/v2.11/'+message[0]+'/conversations?fields=senders&access_token='+token;
-			
+			var url = 'https://graph.facebook.com/v2.11/'+message[0]+'/conversations?fields=senders&access_token='+token;			
 			api(url, function (error, response, body) {
 				if (!error && response.statusCode == 200) {
 					var raw_obj = JSON.parse(body);
@@ -229,19 +227,23 @@ var rooms = [];
 			})		
 		});
 		
-		socket.on('webhook', function(message){
+		/*socket.on('webhook', function(message){
 			var token = message[0];
 			//var token = req.user.token;
 			console.log("=======44444444444444");
 			console.log(message[1]);
 			var student_obj = message[1];		
-			var field = student_obj.entry['0'].changes['0'].field;			
+			var field = student_obj.entry['0'].changes['0'].field;
+			//console.log(field);			
 			if(field == 'conversations'){
+				
 				conv = student_obj.entry['0'].changes['0'].value.thread_id;
 				var id_con = student_obj.entry['0'].id;
 				var url = 'https://graph.facebook.com/v2.11/'+conv+'/messages?fields=message,from,created_time,attachments&access_token='+token;		
 				api(url, function (error, response, body) {
+					console.log(url);
 					if (!error && response.statusCode == 200) {
+							
 						var info = JSON.parse(body);
 						var ms = info.data[0];
 						var str = ms.message;
@@ -276,7 +278,24 @@ var rooms = [];
 					}
 				})	
 			}	
+		});*/
+		
+		socket.on('load message', function(message){
+			var conv = message[0];
+			var token = message[1];
+			var room = message[2];
+			var url = 'https://graph.facebook.com/v2.11/'+conv+'/messages?fields=message,from,created_time,attachments&access_token='+token;			
+			api(url, function (error, response, body) {
+				if (!error && response.statusCode == 200) {
+					var raw_obj = JSON.parse(body);
+					//io.emit('messages', raw_obj);
+					io.sockets.in(room).emit('show message', raw_obj);
+				}				
+			})	
+					
 		});
+		
+		
 	});
 
 
@@ -284,5 +303,5 @@ var rooms = [];
 	  console.log('listening on *:' + port);
 	});
 	
-	https.createServer(options, app).listen(3000);
+	//https.createServer(options, app).listen(3000);
 

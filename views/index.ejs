@@ -49,16 +49,17 @@
 		var conv_id = "";
 		var token = "<%= user.token %>";
 		var room = "<%= user.token %>";
+		var page_token = "";
+		var convers_arr = [];
+		var message_arr = [];
+		var message_new = [];
 		socket.emit('get page', token);
         $('form').submit(function(){
 			socket.emit('chat message', $('#m').val());
 			var token = $('#conver-fb').attr('token');
-			var ar = [conv_id,token, $('#m').val()];
-			
-			socket.emit('chat message', ar);
-			
-			$('#m').val('');
-			
+			var ar = [conv_id,token, $('#m').val()];			
+			socket.emit('chat message', ar);			
+			$('#m').val('');			
 			return false;
         });
         socket.on('chat message', function(msg){
@@ -69,24 +70,26 @@
         });
 		
 		socket.on('webhook', function(msg){
-			console.log(msg);
-			var ar = [room, msg];
-			socket.emit('webhook', ar);
-			
+			//console.log(msg);			
+			//var field = msg.entry['0'].changes;
+			if(msg.entry['0'].changes){
+				var conv = msg.entry['0'].changes['0'].value.thread_id;
+				if(conv_id == conv){
+					var ar = [page_token, msg];
+					socket.emit('webhook', ar);
+				}
+			}			
         });
 		
 		socket.on('facebook_page', function(msg){
 			var obj = jQuery.parseJSON( '{ "name": "John" }' );
-			//console.log(msg.data);
 			$('#page-fb').html("");
 			var curren_token = $('#token').val();
-			console.log(curren_token);
-			console.log("==========");
-			console.log(token);
+			//console.log(curren_token);
+			//console.log("==========");
+			//console.log(token);
 			$.each( msg.data, function( key, value ) {
-				//if(curren_token == token){
-					$('.'+token).append($('<li class="page-li" token="'+value.access_token+'" page_id="'+value.id+'">').html(value.name));
-				//}
+				$('.'+token).append($('<li class="page-li" token="'+value.access_token+'" page_id="'+value.id+'">').html(value.name));
 			});
 			
         });
@@ -94,11 +97,13 @@
 		$(document).on('click', '.page-li', function(e) { 
 			var id = $(this).attr('page_id');
 			var token = $(this).attr('token');
+			page_token = token;
 			var ar = [id, token, room];
-			$('#conver-fb').attr('token', token);
 			
+			$('#conver-fb').attr('token', token);			
 			socket.emit('conversations', ar);
 		});
+		
 		socket.on('conversations', function(msg){			
 			$('#conver-fb').html("");
 			$.each( msg.data, function( key, value ) {
@@ -112,24 +117,22 @@
 			var token = $('#conver-fb').attr('token');
 			var ar = [id, token, room];
 			conv_id = id;
+			convers_arr = ar;
 			//console.log(ar);
 			socket.emit('messages', ar);
 		});
-		socket.on('messages', function(msg){			
-			
-			$('#messages').html('<li class="conver-first" ></li>');
+		
+		socket.on('messages', function(msg){	
+			$('#messages').html('<li class="conver-first" ></li>');			
 			var msg_arr = msg.data.reverse();
-			console.log(msg_arr); 
-			//return false;
 			$.each( msg_arr, function( key, value ) {
+				var id = value.id;					
+				message_arr.push(id);
 				if(value.message == ""){
-					var id = value.id;
 					var name = value.from.name;
 					var token = $('#conver-fb').attr('token');
-					var ar = [id,name,token];
-					
-					//socket.emit('attachments', ar);
-					
+					var ar = [id,name,token];					
+					//socket.emit('attachments', ar);					
 					if(value.attachments){
 						if(value.attachments.data[0].mime_type == "image/jpeg"){					
 							var str = "<a href='"+value.attachments.data[0].image_data.url+"'><img src='"+value.attachments.data[0].image_data.url+"' style='width:50px' /></a>";					
@@ -150,7 +153,6 @@
         });
 		
 		socket.on('attachments', function(msg){	
-		//console.log(msg);
 			if(msg.attachments){
 				if(msg.attachments.data[0].mime_type == "image/jpeg"){					
 					var str = "<a href='"+msg.attachments.data[0].image_data.url+"'><img src='"+msg.attachments.data[0].image_data.url+"' style='width:50px' /></a>";					
@@ -159,11 +161,48 @@
 					var str = "<a href='"+msg.attachments.data[0].file_url+"'>"+msg.attachments.data[0].name+"</a>";
 					$('#messages').append($('<li>').html("test" +": "+str));
 				}
-				
 			}
 			window.scrollTo(0, $("#messages").height());
         });
 		
+		socket.on('load message', function(msg){		
+			if (convers_arr.length > 0) {
+				//socket.emit('attachments', convers_arr);
+				socket.emit('load message', convers_arr);
+			}
+        });
+		
+		socket.on('show message', function(msg){
+			var msg_arr = msg.data.reverse();
+			$.each( msg_arr, function( key, value ) {
+				var id = value.id;
+				//console.log(message_arr);
+				if ($.inArray(id, message_arr) != -1)
+				{
+				}else{
+					message_arr.push(id);
+					if(value.message == ""){
+						
+						var name = value.from.name;
+						var token = $('#conver-fb').attr('token');
+						var ar = [id,name,token];						
+						//socket.emit('attachments', ar);						
+						if(value.attachments){
+							if(value.attachments.data[0].mime_type == "image/jpeg"){					
+								var str = "<a href='"+value.attachments.data[0].image_data.url+"'><img src='"+value.attachments.data[0].image_data.url+"' style='width:50px' /></a>";					
+								$('#messages').append($('<li>').html( value.from.name+": "+str));
+							}else{
+								var str = "<a href='"+value.attachments.data[0].file_url+"'>"+value.attachments.data[0].name+"</a>";
+								$('#messages').append($('<li>').html(value.from.name +": "+str));
+							}						
+						}					
+					}else{
+						$('#messages').append($('<li>').html(value.from.name +": "+value.message));
+						window.scrollTo(0, $("#messages").height());
+					}
+				}
+			});
+        });
 		
 	});
     </script>
