@@ -52,10 +52,9 @@
 		var page_token = "";
 		var convers_arr = [];
 		var message_arr = [];
-		var message_new = [];
 		socket.emit('get page', token);
         $('form').submit(function(){
-			socket.emit('chat message', $('#m').val());
+			//socket.emit('chat message', $('#m').val());
 			var token = $('#conver-fb').attr('token');
 			var ar = [conv_id,token, $('#m').val()];			
 			socket.emit('chat message', ar);			

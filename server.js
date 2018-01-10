@@ -155,10 +155,10 @@ var rooms = [];
 				headers: headers,
 				form: {'message': message_txt}
 			}
+			console.log(options);
 			// Start the request
 			request(options, function (error, response, body) {
-				if (!error && response.statusCode == 200) {
-				}
+				console.log(response.statusCode);
 			})
 		});
 		socket.on('conversations', function(message){
