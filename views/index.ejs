@@ -124,6 +124,7 @@
 		socket.on('messages', function(msg){	
 			$('#messages').html('<li class="conver-first" ></li>');			
 			var msg_arr = msg.data.reverse();
+			console.log(msg_arr);	
 			$.each( msg_arr, function( key, value ) {
 				var id = value.id;					
 				message_arr.push(id);
@@ -134,16 +135,24 @@
 					//socket.emit('attachments', ar);					
 					if(value.attachments){
 						if(value.attachments.data[0].mime_type == "image/jpeg"){					
-							var str = "<a href='"+value.attachments.data[0].image_data.url+"'><img src='"+value.attachments.data[0].image_data.url+"' style='width:50px' /></a>";					
+							var str = "<a target='_blank' href='"+value.attachments.data[0].image_data.url+"'><img src='"+value.attachments.data[0].image_data.url+"' style='width:50px' /></a>";					
 							$('#messages').append($('<li>').html( value.from.name+": "+str));
 						}else{
-							var str = "<a href='"+value.attachments.data[0].file_url+"'>"+value.attachments.data[0].name+"</a>";
+							var str = "<a target='_blank' href='"+value.attachments.data[0].file_url+"'>"+value.attachments.data[0].name+"</a>";
 							$('#messages').append($('<li>').html(value.from.name +": "+str));
 						}
 						
 					}
 					
+					if(value.sticker){
+						if(value.sticker != ""){
+							var str = "<a target='_blank' href='"+value.sticker+"'><img src='"+value.sticker+"' style='width:50px' /></a>";					
+							$('#messages').append($('<li>').html( value.from.name+": "+str));
+						}
+					}
+					
 				}else{
+					
 					$('#messages').append($('<li>').html(value.from.name +": "+value.message));
 					window.scrollTo(0, $("#messages").height());
 				}				
@@ -154,10 +163,10 @@
 		socket.on('attachments', function(msg){	
 			if(msg.attachments){
 				if(msg.attachments.data[0].mime_type == "image/jpeg"){					
-					var str = "<a href='"+msg.attachments.data[0].image_data.url+"'><img src='"+msg.attachments.data[0].image_data.url+"' style='width:50px' /></a>";					
+					var str = "<a target='_blank' href='"+msg.attachments.data[0].image_data.url+"'><img src='"+msg.attachments.data[0].image_data.url+"' style='width:50px' /></a>";					
 					$('#messages').append($('<li>').html( "tet"+": "+str));
 				}else{
-					var str = "<a href='"+msg.attachments.data[0].file_url+"'>"+msg.attachments.data[0].name+"</a>";
+					var str = "<a target='_blank' href='"+msg.attachments.data[0].file_url+"'>"+msg.attachments.data[0].name+"</a>";
 					$('#messages').append($('<li>').html("test" +": "+str));
 				}
 			}
@@ -188,13 +197,19 @@
 						//socket.emit('attachments', ar);						
 						if(value.attachments){
 							if(value.attachments.data[0].mime_type == "image/jpeg"){					
-								var str = "<a href='"+value.attachments.data[0].image_data.url+"'><img src='"+value.attachments.data[0].image_data.url+"' style='width:50px' /></a>";					
+								var str = "<a target='_blank' href='"+value.attachments.data[0].image_data.url+"'><img src='"+value.attachments.data[0].image_data.url+"' style='width:50px' /></a>";					
 								$('#messages').append($('<li>').html( value.from.name+": "+str));
 							}else{
-								var str = "<a href='"+value.attachments.data[0].file_url+"'>"+value.attachments.data[0].name+"</a>";
+								var str = "<a target='_blank' href='"+value.attachments.data[0].file_url+"'>"+value.attachments.data[0].name+"</a>";
 								$('#messages').append($('<li>').html(value.from.name +": "+str));
 							}						
-						}					
+						}
+						if(value.sticker){
+							if(value.sticker != ""){
+								var str = "<a target='_blank' href='"+value.sticker+"'><img src='"+value.sticker+"' style='width:50px' /></a>";					
+								$('#messages').append($('<li>').html( value.from.name+": "+str));
+							}
+						}						
 					}else{
 						$('#messages').append($('<li>').html(value.from.name +": "+value.message));
 						window.scrollTo(0, $("#messages").height());
