@@ -62,8 +62,17 @@
 			return false;
         });
         socket.on('chat message', function(msg){
-			if(conv_id == msg[0]){
-				$('#messages').append($('<li>').html(msg[1]+": "+msg[2]));
+			if(conv_id == msg[0] && $( "li" ).hasClass( '"'+msg[3]+'"' ) == false){
+				var id = msg[3].replace(".", "");
+				id = id.replace("$", "");
+				$('#messages').append($('<li class="'+id+'" style="display:none">').html(msg[1]+": "+msg[2]));
+				$( "."+id ).each(function( i ) {
+					if(i == 0){
+						$(this).css('display','block');
+					}else{
+						$(this).remove();
+					}
+				});
 			}
 			window.scrollTo(0, $("#messages").height());
         });

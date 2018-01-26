@@ -8,7 +8,7 @@ var app = require('express')();
 
 var http = require('http').Server(app);
 var https = require('https');
-var pem = require('pem')
+//var pem = require('pem')
 var io = require('socket.io')(http);
 const request = require('request-promise');
 var api = require('request');
@@ -50,7 +50,7 @@ app.use(require('express-session')({ secret: 'keyboard cat', resave: true, saveU
 app.use(passport.initialize());
 app.use(passport.session());
 
-//var token = 'EAAEfHG6gfw4BALB9Ba0lhIPco2xZBCBGWKhJdf0IAZAyyozsMYJDVe6yPB6RN5Xtb2MgZB710SIai8k9kLsZAZAkoPlOzhLzoiOgxW58ekQFwagG8ZCmb0H9Lgq0ahyuZCpZCATa1RvD8fVCMZBMlLG9nujLRJM5vBdvErHwkeZBKUFAZDZD';	
+var token = "EAAEfHG6gfw4BABJavQZCxMRaUsZAHAndYbhv1UTsnEaWvbc6dGmWrczyG1gBI7fM77plwfjOlftAIZAPkBXnK6U1RAoLUyby10y5yaE7eJlx9Oe9gskYZBcELJZB1XdWpvxiQr27rI7J6IL8XEaGZAzA7EKKRSY5yjo6XReZA4mawZDZD";
 var conv = "";
 var rooms = [];
 
@@ -60,7 +60,8 @@ var rooms = [];
 		});
 
 	app.get('/login',
-		function(req, res){
+		function(req, res){	
+			
 			res.render('login');
 		});
 
@@ -84,6 +85,7 @@ var rooms = [];
 				if (!error && response.statusCode == 200) {
 					var raw_obj = JSON.parse(body);
 					//console.log(raw_obj);
+					
 					io.emit('facebook_page', raw_obj);
 					req.user.pages = raw_obj;					
 				}
@@ -96,7 +98,8 @@ var rooms = [];
 		require('connect-ensure-login').ensureLoggedIn(),
 		function(req, res){
 			var token = req.user.token;
-			rooms.push(token);			
+			rooms.push(token);
+					
 			res.render('index', { user: req.user });			
 	});
 	
@@ -109,15 +112,76 @@ var rooms = [];
 	
 	app.post('/webhook', function(req, res){
 		var rawBody = req.rawBody.toString('utf8');
-		var student_obj = JSON.parse(rawBody);
-		io.emit('webhook', student_obj);
+		var obj = JSON.parse(rawBody);
 		
+		//console.log(obj.entry['0'].changes.value);
+		/*if(obj.object){
+			
+		}else{*/
+			if(typeof obj.entry['0'].changes !== 'undefined' && typeof obj.entry['0'].changes['0'].field !== 'undefined' && obj.entry['0'].changes['0'].field  == "feed"){
+				//res.send(obj);
+				if(obj.entry['0'].changes['0'].value.from.id != obj.entry['0'].id){
+					if(obj.entry['0'].changes['0'].field == 'feed'){
+						if(obj.entry['0'].changes['0'].value.item == 'comment'){
+							var comment_id = obj.entry['0'].changes['0'].value.comment_id;
+							var verb = obj.entry['0'].changes['0'].value.verb;
+							var page_id = obj.entry['0'].id;
+							console.log(page_id);
+							var token = "";
+							let fs_token = (page_id) => { return new Promise((resolve, reject) => {								
+								fs.readFile('list_app.json', 'utf8', function readFileCallback(err, data){
+									if (err){
+										console.log(err);
+									} else {
+									obj = JSON.parse(data); //now it an object									
+									resolve(obj[page_id]);
+								}});
+							})}
+							let reply = async () => { 								
+								let token = await fs_token(page_id);
+								if(verb == "add"){					
+									var headers = {
+										'User-Agent':       'Super Agent/0.0.1',
+										'Content-Type':     'application/x-www-form-urlencoded'
+									}
+									// Configure the request
+									var options = {
+										url: 'https://graph.facebook.com/v2.11/'+comment_id+'?access_token='+token,
+										method: 'POST',
+										headers: headers,
+										form: {'is_hidden': true}
+									}			
+									// Start the request
+									request(options, function (error, response, body) {
+										console.log(response.statusCode);
+									})
+									
+									var options_comment = {
+										url: 'https://graph.facebook.com/v2.11/'+comment_id+'/comments?access_token='+token,
+										method: 'POST',
+										headers: headers,
+										form: {'message': "Chúng tôi đã nhận được tin và sẽ sớm liên hệ lại!"}
+									}			
+									// Start the request
+									request(options_comment, function (error, response, body) {
+										console.log(response.statusCode);
+									})
+								}
+							}							
+							reply();
+						}
+					}
+				}
+			}else{
+				if(typeof obj.entry['0'].changes !== 'undefined' && typeof obj.entry['0'].changes['0'].field !== 'undefined' && obj.entry['0'].changes['0'].field  == "conversations"){
+					io.emit('webhook', obj);
+				}
+			}
+		
+		//}
 	});
 	
-	/*setInterval(() => {		
-		io.emit('load message', "new message");
-	}, 3000)
-	*/
+	
 	app.get('/webhook', function(req, res){
 		let VERIFY_TOKEN = "123456"    
 		// Parse the query params
@@ -135,6 +199,91 @@ var rooms = [];
 			  // Responds with '403 Forbidden' if verify tokens do not match
 			  res.sendStatus(403);      
 			}
+		}
+	});
+
+	
+	
+	/*setInterval(() => {		
+		io.emit('load message', "new message");
+	}, 3000)
+	*/
+	
+	/*setInterval(() => {		
+		fs.readFile('list_app.json', 'utf8', function readFileCallback(err, data){
+			if (err){
+				console.log(err);
+			} else {
+			obj = JSON.parse(data); //now it an object
+			let reset_token = () => { return new Promise(() => {
+				Object.keys(obj).forEach(function (key) {
+					console.log(key);
+					var token_reset = obj[key];
+					
+					var url = 'https://graph.facebook.com/v2.11/oauth/access_token?grant_type=fb_exchange_token&client_id=315681952268046&client_secret=6f5c5207bb4623ca26144841729797ba&fb_exchange_token='+token_reset;
+					api(url, function (error, response, body) {
+						if (!error && response.statusCode == 200) {
+							var raw_obj = JSON.parse(body);
+							//console.log(raw_obj);
+							obj[key] = raw_obj.access_token;
+							
+						}				
+					})
+					return obj;
+					
+				})
+			})
+			}
+			
+			let add = async () => { let res = await reset_token();}
+			console.log(add);
+			//json = JSON.stringify(obj); //convert it back to json
+			//fs.writeFile('list_app.json', json, 'utf8', null); // write it back 
+		}});
+	}, 3000)*/
+	
+	
+	app.get('/comment', function(req, res){
+		
+		var url = req.query['url'];
+		var video_url = req.query['video_url'];
+		var message = req.query['message'];			
+		if (url && url != "") {
+			var headers = {
+				'User-Agent':       'Super Agent/0.0.1',
+				'Content-Type':     'application/x-www-form-urlencoded'
+			}
+			// Configure the request
+			var options = {
+				url: 'https://graph.facebook.com/v2.11/me/photos?access_token='+token,
+				method: 'POST',
+				headers: headers,
+				form: {'url': url, 'caption': message}
+			}			
+			// Start the request
+			request(options, function (error, response, body) {
+				console.log(response.statusCode);
+				res.send(response.statusCode);
+			})
+		}
+		
+		if (video_url && video_url != "") {
+			var headers = {
+				'User-Agent':       'Super Agent/0.0.1',
+				'Content-Type':     'application/x-www-form-urlencoded'
+			}
+			// Configure the request
+			var options = {
+				url: 'https://graph.facebook.com/v2.11/me/videos?access_token='+token,
+				method: 'POST',
+				headers: headers,
+				form: {'description': message, 'description': message, 'file_url':video_url}
+			}			
+			// Start the request
+			request(options, function (error, response, body) {
+				console.log(response.statusCode);
+				res.send(response.statusCode);
+			})
 		}
 	});
 
@@ -165,9 +314,7 @@ var rooms = [];
 			var token = message[1];
 			var room = message[2];
 			var url = 'https://graph.facebook.com/v2.11/'+message[0]+'/conversations?fields=senders&access_token='+token;
-			console.log("=======");
-					console.log(url);
-					console.log("=======");			
+					
 			api(url, function (error, response, body) {
 				if (!error && response.statusCode == 200) {
 					var raw_obj = JSON.parse(body);
@@ -212,13 +359,26 @@ var rooms = [];
 		socket.on('get page', function(message){
 			var token = message;
 			socket.join(token);
-			console.log("=======");			
+			//console.log("=======");			
 			var url = 'https://graph.facebook.com/v2.11/me/accounts?access_token='+token;
-			console.log(url);
+			//console.log(url);
 			api(url, function (error, response, body) {
 				if (!error && response.statusCode == 200) {
 					var raw_obj = JSON.parse(body);
 					//console.log(raw_obj);
+					fs.readFile('list_app.json', 'utf8', function readFileCallback(err, data){
+						if (err){
+							console.log(err);
+						} else {
+						obj = JSON.parse(data); //now it an object
+						raw_obj.data.forEach(function (item) {
+							obj[item.id] = item.access_token;
+						})
+						
+						
+						json = JSON.stringify(obj); //convert it back to json
+						fs.writeFile('list_app.json', json, 'utf8', null); // write it back */
+					}});
 					io.sockets.in(token).emit('facebook_page', raw_obj);
 					//io.emit('facebook_page', raw_obj);
 					//req.user.pages = raw_obj;
@@ -232,8 +392,8 @@ var rooms = [];
 		socket.on('webhook', function(message){
 			var token = message[0];
 			//var token = req.user.token;
-			console.log("=======44444444444444");
-			console.log(message[1]);
+			//console.log("=======44444444444444");
+			//console.log(message[1]);
 			var student_obj = message[1];		
 			var field = student_obj.entry['0'].changes['0'].field;
 			//console.log(field);
@@ -251,18 +411,18 @@ var rooms = [];
 						var id = ms.id;
 						var name = ms.from.name;
 						var ar = [];
-						console.log(ms);
+						//console.log(ms);
 						if(str === ""){
 							if(ms.attachments){
 								if(ms.attachments.data[0].mime_type == "image/jpeg"){
 									str = "<a href='"+ms.attachments.data[0].image_data.url+"'><img src='"+ms.attachments.data[0].image_data.url+"' style='width:50px' /></a>";
-									ar = [conv, name, str];
+									ar = [conv, name, str, id];
 									io.emit('chat message', ar);
 											
 									
 								}else{
 									str = "<a href='"+ms.attachments.data[0].file_url+"'>"+ms.attachments.data[0].name+"</a>";
-									ar = [conv, name, str];
+									ar = [conv, name, str, id];
 									io.emit('chat message', ar);
 									
 									
@@ -273,45 +433,51 @@ var rooms = [];
 							if(ms.sticker){
 								if(ms.sticker != ""){
 									str = "<a target='_blank' href='"+ms.sticker+"'><img src='"+ms.sticker+"' style='width:50px' /></a>";					
-									ar = [conv, name, str];
+									ar = [conv, name, str, id];
 									io.emit('chat message', ar);
 								}
 							}
 							
-							/*var url_att = 'https://graph.facebook.com/v2.11/'+id+'/attachments?access_token='+token;
-							api(url_att, function (err_att, res_att, body_att) {							
-								if (!err_att && res_att.statusCode == 200) {
-									//res.setHeader('test', '1');
-									var body_arr = JSON.parse(body_att);					
-									if(body_arr.data.length > 0){
-										if(body_arr.data[0].mime_type == "image/jpeg"){	
-											str = "<a href='"+body_arr.data[0].image_data.url+"'><img src='"+body_arr.data[0].image_data.url+"' style='width:50px' /></a>";
-											ar = [conv, name, str];
-											io.emit('chat message', ar);
-										}else{
-											str = "<a href='"+body_arr.data[0].file_url+"'>"+body_arr.data[0].name+"</a>";
-											ar = [conv, name, str];
-											io.emit('chat message', ar);
-										}									
-									}
-									/*if(value.sticker){
-										if(value.sticker != ""){
-											var str = "<a target='_blank' href='"+value.sticker+"'><img src='"+value.sticker+"' style='width:50px' /></a>";					
-											$('#messages').append($('<li>').html( value.from.name+": "+str));
-										}
-									}
-									return body_arr;								
-								}							
-							})*/
+							
 							//io.emit('load message', "new message");
 						}else{
-							ar = [conv, name, str];
+							ar = [conv, name, str, id];
 							io.emit('chat message', ar);
+							//var str = "[search]iPhone 7[/search]";
+							var pro_ar = [{'title':'iPhone X', 'url':'https://www.thegioididong.com/dtdd/iphone-x-64gb'},{'title':'iPhone 7', 'url':'https://www.thegioididong.com/dtdd/iphone-7'}];
+							var txt_search = str.substring(str.lastIndexOf("[search]")+8,str.lastIndexOf("[/search]"));
+							console.log(txt_search);
+							
+							for (i = 0; i < pro_ar.length; ++i) {
+								var title_search = pro_ar[i].title;
+								var pro_url = pro_ar[i].url;
+								//console.log(title_search);
+								if(title_search.indexOf(txt_search) != -1){
+									var headers = {
+										'User-Agent':       'Super Agent/0.0.1',
+										'Content-Type':     'application/x-www-form-urlencoded'
+									}
+									// Configure the request
+									var options = {
+										url: 'https://graph.facebook.com/v2.11/'+conv+'/messages?access_token='+token,
+										method: 'POST',
+										headers: headers,
+										form: {'message': pro_url}
+									}
+									
+									console.log(options);
+									// Start the request
+									request(options, function (error, response, body) {
+										console.log(response.statusCode);
+									})
+								}
+							}
 						}				
 						return true;
 					}
 				})	
-			}	
+			}
+			
 		});
 		
 		socket.on('load message', function(message){
